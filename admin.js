@@ -1,4 +1,5 @@
 let supabaseClient = null;
+let authRedirectUrl = "";
 
 const adminNotice = document.querySelector("#adminNotice");
 const adminPanel = document.querySelector("#adminPanel");
@@ -19,6 +20,7 @@ async function initAuth() {
     if (!response.ok) throw new Error(config.error || "Missing auth config.");
 
     supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    authRedirectUrl = config.authRedirectUrl || window.location.href.split("#")[0];
     supabaseClient.auth.onAuthStateChange(updateAuthUI);
     await updateAuthUI();
   } catch (error) {
@@ -122,7 +124,7 @@ async function updateStatus(id, status) {
 loginBtn.addEventListener("click", async () => {
   await supabaseClient.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: window.location.href.split("#")[0] }
+    options: { redirectTo: authRedirectUrl }
   });
 });
 
