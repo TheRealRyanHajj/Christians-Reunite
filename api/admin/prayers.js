@@ -5,16 +5,60 @@ module.exports = async function handler(req, res) {
     const { supabase } = await requireAdmin(req);
 
     if (req.method === "GET") {
-      const { data, error } = await supabase
+      const {
+        q = "",
+        status = "active",
+        priority = "all",
+        sort = "newest",
+        page = "1",
+        pageSize = "50"
+      } = req.query || {};
+      const currentPage = Math.max(Number.parseInt(page, 10) || 1, 1);
+      const limit = Math.min(Math.max(Number.parseInt(pageSize, 10) || 50, 10), 100);
+      const from = (currentPage - 1) * limit;
+      const to = from + limit - 1;
+      const search = String(q).trim();
+
+      let query = supabase
         .from("prayer_requests")
-        .select("*")
-        .neq("status", "archived")
-        .order("urgent", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(100);
+        .select("*", { count: "exact" });
+
+      if (status === "active") {
+        query = query.neq("status", "archived");
+      } else if (["new", "prayed", "archived"].includes(status)) {
+        query = query.eq("status", status);
+      }
+
+      if (priority === "urgent") query = query.eq("urgent", true);
+      if (priority === "contact") query = query.eq("wants_contact", true);
+      if (priority === "wall") query = query.eq("public_permission", true);
+      if (priority === "private") query = query.eq("public_permission", false);
+
+      if (search) {
+        const safeSearch = search.replace(/[%(),]/g, " ");
+        query = query.or(
+          `name.ilike.%${safeSearch}%,phone.ilike.%${safeSearch}%,category.ilike.%${safeSearch}%,prayer_request.ilike.%${safeSearch}%`
+        );
+      }
+
+      if (sort === "oldest") {
+        query = query.order("created_at", { ascending: true });
+      } else if (sort === "urgent") {
+        query = query.order("urgent", { ascending: false }).order("created_at", { ascending: false });
+      } else {
+        query = query.order("created_at", { ascending: false });
+      }
+
+      const { data, error, count } = await query.range(from, to);
 
       if (error) throw error;
-      res.status(200).json({ prayers: data || [] });
+      res.status(200).json({
+        prayers: data || [],
+        page: currentPage,
+        pageSize: limit,
+        total: count || 0,
+        totalPages: Math.max(Math.ceil((count || 0) / limit), 1)
+      });
       return;
     }
 

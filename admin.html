@@ -38,9 +38,49 @@
       <p id="adminNotice" class="notice"></p>
 
       <section id="adminPanel" class="panel" hidden>
-        <div class="toolbar">
+        <div class="admin-controls">
+          <label class="field search-field">
+            <span>Search</span>
+            <input id="searchInput" type="search" placeholder="Name, phone, category, or prayer text" />
+          </label>
+          <label class="field">
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="active">Active</option>
+              <option value="new">New</option>
+              <option value="prayed">Prayed</option>
+              <option value="archived">Archived</option>
+              <option value="all">All</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Priority</span>
+            <select id="priorityFilter">
+              <option value="all">All</option>
+              <option value="urgent">Urgent</option>
+              <option value="contact">Contact</option>
+              <option value="wall">Wall OK</option>
+              <option value="private">Private</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Sort</span>
+            <select id="sortSelect">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="urgent">Urgent first</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toolbar admin-toolbar">
           <strong id="adminCount">0 requests</strong>
-          <button id="refreshAdmin" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
+          <div class="actions">
+            <button id="prevPage" class="button secondary" type="button"><i data-lucide="chevron-left"></i> Prev</button>
+            <span id="pageInfo" class="page-info">Page 1</span>
+            <button id="nextPage" class="button secondary" type="button">Next <i data-lucide="chevron-right"></i></button>
+            <button id="refreshAdmin" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
+          </div>
         </div>
         <div id="adminList" class="list"></div>
       </section>
