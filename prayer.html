@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prayer Request | Christians Reunite</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="site.js" defer></script>
+  <script src="prayer.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><i data-lucide="cross"></i></span>
+      <span>Christians Reunite</span>
+    </a>
+    <a class="button secondary" href="wall.html"><i data-lucide="heart"></i> Wall</a>
+  </header>
+
+  <main class="section">
+    <div class="wrap narrow">
+      <p class="kicker">Prayer Request</p>
+      <h1 class="page-title">Let us pray with you.</h1>
+      <p class="lead">Requests are sent privately to the prayer team. Only requests with permission are shown on the prayer wall.</p>
+
+      <form id="prayerForm" class="panel">
+        <div class="grid two">
+          <label class="field">
+            <span>Name <small>(optional)</small></span>
+            <input id="name" name="name" autocomplete="name" placeholder="Leave blank for anonymous" />
+          </label>
+          <label class="field">
+            <span>Phone <small>(optional)</small></span>
+            <input id="phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="Optional phone number" />
+          </label>
+        </div>
+
+        <label id="contactRow" class="check disabled">
+          <input id="wantsContact" type="checkbox" disabled />
+          <span>Would you like someone to contact you?</span>
+        </label>
+
+        <label class="field">
+          <span>Category</span>
+          <select id="category" name="category"></select>
+        </label>
+
+        <label class="check">
+          <input id="publicPermission" type="checkbox" />
+          <span>Do we have your permission to put this prayer on the prayer wall?</span>
+        </label>
+
+        <label class="field">
+          <span>Prayer Request</span>
+          <textarea id="request" required placeholder="Share what you would like prayer for."></textarea>
+        </label>
+
+        <label class="check">
+          <input id="urgent" type="checkbox" />
+          <span>Urgent</span>
+        </label>
+
+        <button class="button primary full" type="submit"><i data-lucide="send"></i> Submit Prayer Request</button>
+        <p id="formStatus" class="status" role="status"></p>
+      </form>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
+    <a class="active" href="prayer.html"><i data-lucide="send"></i><span>Prayer</span></a>
+    <a href="wall.html"><i data-lucide="heart"></i><span>Wall</span></a>
+  </nav>
+</body>
+</html>

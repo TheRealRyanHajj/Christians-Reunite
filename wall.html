@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prayer Wall | Christians Reunite</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="site.js" defer></script>
+  <script src="wall.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><i data-lucide="cross"></i></span>
+      <span>Christians Reunite</span>
+    </a>
+    <a class="button secondary" href="prayer.html"><i data-lucide="send"></i> Prayer</a>
+  </header>
+
+  <main class="section">
+    <div class="wrap narrow">
+      <p class="kicker">Prayer Wall</p>
+      <h1 class="page-title">Pray for one another.</h1>
+      <p class="lead">These requests were shared with permission.</p>
+      <div class="toolbar">
+        <button id="refreshWall" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
+      </div>
+      <div id="prayerWall" class="list"></div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
+    <a href="prayer.html"><i data-lucide="send"></i><span>Prayer</span></a>
+    <a class="active" href="wall.html"><i data-lucide="heart"></i><span>Wall</span></a>
+  </nav>
+</body>
+</html>
