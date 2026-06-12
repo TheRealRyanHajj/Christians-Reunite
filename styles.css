@@ -1,16 +1,18 @@
 :root {
   color-scheme: dark;
-  --ink: #f5f7f2;
-  --muted: #aab5ad;
-  --paper: #0d1210;
-  --paper-soft: #121a17;
-  --panel: #161f1b;
-  --panel-strong: #1d2823;
-  --line: rgba(231, 225, 211, .14);
-  --faith: #62c6b2;
-  --faith-dark: #9de6d8;
-  --gold: #f1c15b;
-  --danger: #ff8d83;
+  --ink: #f5f3f5;
+  --muted: #b9b5c8;
+  --paper: #1b2032;
+  --paper-soft: #242848;
+  --panel: #252b49;
+  --panel-strong: #342876;
+  --line: rgba(245, 243, 245, .14);
+  --faith: #38a3a5;
+  --faith-dark: #8de0e1;
+  --gold: #d61976;
+  --danger: #ff7bae;
+  --violet: #7d4597;
+  --purple: #4c3281;
   --shadow: 0 18px 44px rgba(0, 0, 0, .34);
   --radius: 8px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -21,7 +23,7 @@
 body {
   margin: 0;
   padding-bottom: 78px;
-  background: linear-gradient(180deg, #101714 0%, var(--paper) 38rem);
+  background: linear-gradient(180deg, #1b1e6b 0%, var(--paper) 34rem);
   color: var(--ink);
   line-height: 1.5;
   text-rendering: optimizeLegibility;
@@ -40,7 +42,7 @@ a { color: inherit; text-decoration: none; }
   justify-content: space-between;
   gap: 14px;
   padding: 12px 16px;
-  background: rgba(13, 18, 16, .78);
+  background: rgba(27, 32, 50, .82);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
 }
@@ -56,13 +58,19 @@ a { color: inherit; text-decoration: none; }
 .brand-mark {
   width: 38px;
   height: 38px;
-  display: grid;
-  place-items: center;
+  display: block;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--faith), var(--gold));
-  color: #07100d;
+  background: var(--paper);
+  color: var(--ink);
   flex: 0 0 auto;
-  box-shadow: 0 10px 24px rgba(98, 198, 178, .18);
+  box-shadow: 0 10px 24px rgba(214, 25, 118, .18);
+  overflow: hidden;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .hero {
@@ -80,7 +88,7 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: -2;
   background-image:
-    linear-gradient(180deg, rgba(6, 10, 8, .18), rgba(8, 12, 10, .9)),
+    linear-gradient(180deg, rgba(27, 30, 107, .26), rgba(27, 32, 50, .92)),
     url("assets/hero-fellowship.png");
   background-size: cover;
   background-position: center;
@@ -92,7 +100,7 @@ a { color: inherit; text-decoration: none; }
   inset: auto 0 0;
   z-index: -1;
   height: 22vh;
-  background: linear-gradient(180deg, rgba(13, 18, 16, 0), var(--paper));
+  background: linear-gradient(180deg, rgba(27, 32, 50, 0), var(--paper));
 }
 
 .hero-content {
@@ -106,8 +114,8 @@ a { color: inherit; text-decoration: none; }
   padding: 8px 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, .16);
-  background: rgba(13, 18, 16, .42);
-  color: #f8faf6;
+  background: rgba(27, 32, 50, .48);
+  color: var(--ink);
   font-size: 13px;
   font-weight: 900;
   backdrop-filter: blur(12px);
@@ -152,7 +160,7 @@ h2, .page-title {
 }
 
 .band {
-  background: rgba(18, 26, 23, .78);
+  background: rgba(52, 40, 118, .34);
   border-block: 1px solid var(--line);
 }
 
@@ -190,7 +198,7 @@ h2, .page-title {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #111a16;
+  background: rgba(27, 30, 107, .24);
 }
 
 .admin-toolbar {
@@ -227,9 +235,9 @@ button:disabled {
 }
 
 .button.primary {
-  background: linear-gradient(135deg, var(--faith), #38a895);
-  color: #07100d;
-  box-shadow: 0 14px 28px rgba(98, 198, 178, .2);
+  background: linear-gradient(135deg, var(--faith), var(--violet));
+  color: var(--ink);
+  box-shadow: 0 14px 28px rgba(56, 163, 165, .2);
 }
 
 .button.secondary {
@@ -240,12 +248,12 @@ button:disabled {
 
 .button.light {
   background: rgba(255, 255, 255, .12);
-  color: #fff;
+  color: var(--ink);
 }
 
 .button.danger {
-  border: 1px solid rgba(255, 141, 131, .28);
-  background: rgba(255, 141, 131, .12);
+  border: 1px solid rgba(214, 25, 118, .38);
+  background: rgba(214, 25, 118, .15);
   color: var(--danger);
 }
 
@@ -271,7 +279,7 @@ button:disabled {
 
 .card {
   padding: 16px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, .055), rgba(255, 255, 255, .025));
+  background: linear-gradient(180deg, rgba(245, 243, 245, .07), rgba(245, 243, 245, .025));
 }
 
 .card.small i {
@@ -289,7 +297,7 @@ button:disabled {
   display: grid;
   gap: 14px;
   padding: 16px;
-  background: rgba(22, 31, 27, .9);
+  background: rgba(37, 43, 73, .9);
   box-shadow: var(--shadow);
 }
 
@@ -309,7 +317,7 @@ input, select, textarea {
   min-height: 46px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #0f1714;
+  background: #1f2440;
   color: var(--ink);
   padding: 12px;
   outline: none;
@@ -322,11 +330,11 @@ textarea {
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--faith);
-  box-shadow: 0 0 0 3px rgba(98, 198, 178, .18);
+  box-shadow: 0 0 0 3px rgba(56, 163, 165, .2);
 }
 
 ::placeholder {
-  color: #6f7d75;
+  color: #8984a8;
 }
 
 .check {
@@ -336,7 +344,7 @@ input:focus, select:focus, textarea:focus {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #111a16;
+  background: rgba(27, 30, 107, .24);
   font-weight: 800;
 }
 
@@ -415,16 +423,16 @@ input:focus, select:focus, textarea:focus {
   gap: 6px;
   padding: 5px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(98, 198, 178, .18);
-  background: rgba(98, 198, 178, .12);
+  border: 1px solid rgba(56, 163, 165, .22);
+  background: rgba(56, 163, 165, .13);
   color: var(--faith-dark);
   font-size: 12px;
   font-weight: 900;
 }
 
 .pill.urgent {
-  border-color: rgba(255, 141, 131, .24);
-  background: rgba(255, 141, 131, .13);
+  border-color: rgba(214, 25, 118, .34);
+  background: rgba(214, 25, 118, .16);
   color: var(--danger);
 }
 
@@ -439,7 +447,7 @@ input:focus, select:focus, textarea:focus {
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: #111a16;
+  background: rgba(27, 30, 107, .24);
   color: var(--muted);
   font-size: 14px;
 }
@@ -462,7 +470,7 @@ input:focus, select:focus, textarea:focus {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(13, 18, 16, .9);
+  background: rgba(27, 32, 50, .92);
   box-shadow: 0 16px 34px rgba(0, 0, 0, .35);
   backdrop-filter: blur(18px);
 }
@@ -479,7 +487,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .bottom-nav a.active {
-  background: rgba(98, 198, 178, .14);
+  background: rgba(56, 163, 165, .16);
   color: var(--faith-dark);
 }
 
