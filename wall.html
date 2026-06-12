@@ -21,14 +21,53 @@
   </header>
 
   <main class="section">
-    <div class="wrap narrow">
+    <div class="wrap">
       <p class="kicker">Prayer Wall</p>
       <h1 class="page-title">Pray for one another.</h1>
       <p class="lead">These requests were shared with permission.</p>
-      <div class="toolbar">
-        <button id="refreshWall" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
-      </div>
-      <div id="prayerWall" class="list"></div>
+
+      <section class="panel">
+        <div class="wall-controls">
+          <label class="field search-field">
+            <span>Search</span>
+            <input id="wallSearch" type="search" placeholder="Search public prayers" />
+          </label>
+          <label class="field">
+            <span>Category</span>
+            <select id="wallCategory">
+              <option value="all">All</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Priority</span>
+            <select id="wallPriority">
+              <option value="all">All</option>
+              <option value="urgent">Urgent</option>
+              <option value="not-prayed">Not prayed for yet</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Sort</span>
+            <select id="wallSort">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="not-prayed">Not prayed for yet</option>
+              <option value="most-prayed">Most prayed</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toolbar">
+          <strong id="wallCount">0 requests</strong>
+          <div class="actions">
+            <button id="prevWallPage" class="button secondary" type="button"><i data-lucide="chevron-left"></i> Prev</button>
+            <span id="wallPageInfo" class="page-info">Page 1</span>
+            <button id="nextWallPage" class="button secondary" type="button">Next <i data-lucide="chevron-right"></i></button>
+            <button id="refreshWall" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
+          </div>
+        </div>
+        <div id="prayerWall" class="list"></div>
+      </section>
     </div>
   </main>
 

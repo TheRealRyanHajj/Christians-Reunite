@@ -182,7 +182,8 @@ h2, .page-title {
   min-height: 44px;
 }
 
-.admin-controls {
+.admin-controls,
+.wall-controls {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
@@ -395,6 +396,10 @@ input:focus, select:focus, textarea:focus {
   font-size: 13px;
 }
 
+.wall-row .actions {
+  justify-content: flex-start;
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -491,7 +496,8 @@ input:focus, select:focus, textarea:focus {
   .section { padding: 58px 30px; }
   .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-head { flex-wrap: nowrap; }
-  .admin-controls {
+  .admin-controls,
+  .wall-controls {
     grid-template-columns: minmax(260px, 1.6fr) repeat(3, minmax(130px, .7fr));
     align-items: end;
   }
