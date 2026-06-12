@@ -178,6 +178,10 @@ h2, .page-title {
   align-items: center;
 }
 
+.admin-login {
+  min-height: 44px;
+}
+
 .toolbar, .admin-head {
   justify-content: space-between;
   margin-bottom: 16px;

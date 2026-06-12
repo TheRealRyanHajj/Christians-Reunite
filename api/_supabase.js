@@ -1,4 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
+const { OAuth2Client } = require("google-auth-library");
 
 const DEFAULT_CATEGORIES = [
   "Addiction",
@@ -53,21 +54,27 @@ async function requireAdmin(req) {
   }
 
   const supabase = getServiceClient();
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data.user?.email) {
+  const googleClient = new OAuth2Client(getEnv("GOOGLE_CLIENT_ID"));
+  const ticket = await googleClient.verifyIdToken({
+    idToken: token,
+    audience: getEnv("GOOGLE_CLIENT_ID")
+  });
+  const payload = ticket.getPayload();
+
+  if (!payload?.email || !payload.email_verified) {
     const authError = new Error("Invalid sign-in session.");
     authError.status = 401;
     throw authError;
   }
 
-  const email = data.user.email.toLowerCase();
+  const email = payload.email.toLowerCase();
   if (!getAdminEmails().includes(email)) {
     const forbidden = new Error("This account is not allowed to access admin.");
     forbidden.status = 403;
     throw forbidden;
   }
 
-  return { supabase, user: data.user };
+  return { supabase, user: { email } };
 }
 
 function sendError(res, error) {

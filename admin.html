@@ -7,7 +7,7 @@
   <title>Admin | Christians Reunite</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://unpkg.com/@supabase/supabase-js@2" defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="site.js" defer></script>
   <script src="admin.js" defer></script>
@@ -29,8 +29,8 @@
           <h1 class="page-title">Prayer requests</h1>
           <p class="lead">Sign in with an allowed Google account.</p>
         </div>
-        <div class="actions">
-          <button id="loginBtn" class="button primary" type="button"><i data-lucide="log-in"></i> Google Sign In</button>
+        <div class="actions admin-login">
+          <div id="googleSignIn"></div>
           <button id="logoutBtn" class="button secondary" type="button" hidden><i data-lucide="log-out"></i> Sign Out</button>
         </div>
       </div>

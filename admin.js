@@ -1,11 +1,10 @@
-let supabaseClient = null;
-let authRedirectUrl = "";
+let googleIdToken = sessionStorage.getItem("adminGoogleIdToken") || "";
 
 const adminNotice = document.querySelector("#adminNotice");
 const adminPanel = document.querySelector("#adminPanel");
 const adminList = document.querySelector("#adminList");
 const adminCount = document.querySelector("#adminCount");
-const loginBtn = document.querySelector("#loginBtn");
+const googleSignIn = document.querySelector("#googleSignIn");
 const logoutBtn = document.querySelector("#logoutBtn");
 
 function setNotice(message, isError = false) {
@@ -13,47 +12,82 @@ function setNotice(message, isError = false) {
   adminNotice.classList.toggle("error", isError);
 }
 
+async function loadConfig() {
+  const response = await fetch("/api/config");
+  const config = await response.json();
+  if (!response.ok) throw new Error(config.error || "Missing auth config.");
+  if (!config.googleClientId) throw new Error("Missing GOOGLE_CLIENT_ID.");
+  return config;
+}
+
+function waitForGoogle() {
+  return new Promise((resolve, reject) => {
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      if (window.google?.accounts?.id) {
+        clearInterval(timer);
+        resolve();
+      }
+      if (tries > 80) {
+        clearInterval(timer);
+        reject(new Error("Google sign-in script did not load."));
+      }
+    }, 100);
+  });
+}
+
 async function initAuth() {
   try {
-    const response = await fetch("/api/config");
-    const config = await response.json();
-    if (!response.ok) throw new Error(config.error || "Missing auth config.");
+    const config = await loadConfig();
+    await waitForGoogle();
 
-    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-    authRedirectUrl = config.authRedirectUrl || window.location.href.split("#")[0];
-    supabaseClient.auth.onAuthStateChange(updateAuthUI);
-    await updateAuthUI();
+    window.google.accounts.id.initialize({
+      client_id: config.googleClientId,
+      callback: handleGoogleCredential
+    });
+
+    window.google.accounts.id.renderButton(googleSignIn, {
+      theme: "filled_black",
+      size: "large",
+      text: "signin_with",
+      shape: "rectangular"
+    });
+
+    if (googleIdToken) {
+      await loadAdminRequests();
+      return;
+    }
+
+    showSignedOut();
   } catch (error) {
-    loginBtn.hidden = true;
-    logoutBtn.hidden = true;
     adminPanel.hidden = true;
+    googleSignIn.hidden = true;
+    logoutBtn.hidden = true;
     setNotice(error.message, true);
   }
 }
 
-async function getToken() {
-  const { data } = await supabaseClient.auth.getSession();
-  return data.session?.access_token || "";
+async function handleGoogleCredential(response) {
+  googleIdToken = response.credential || "";
+  sessionStorage.setItem("adminGoogleIdToken", googleIdToken);
+  await loadAdminRequests();
 }
 
-async function updateAuthUI() {
-  if (!supabaseClient) return;
+function showSignedOut() {
+  googleIdToken = "";
+  sessionStorage.removeItem("adminGoogleIdToken");
+  adminPanel.hidden = true;
+  googleSignIn.hidden = false;
+  logoutBtn.hidden = true;
+  setNotice("Sign in with an allowed Google account to view prayer requests.");
+}
 
-  const { data } = await supabaseClient.auth.getSession();
-  const session = data.session;
-
-  loginBtn.hidden = Boolean(session);
-  logoutBtn.hidden = !session;
-
-  if (!session) {
-    adminPanel.hidden = true;
-    setNotice("Sign in with Google to view prayer requests.");
-    return;
-  }
-
+function showSignedIn() {
   adminPanel.hidden = false;
-  setNotice(`Signed in as ${session.user.email}.`);
-  await loadAdminRequests();
+  googleSignIn.hidden = true;
+  logoutBtn.hidden = false;
+  setNotice("Signed in with Google.");
 }
 
 function renderAdmin(items) {
@@ -71,6 +105,7 @@ function renderAdmin(items) {
         ${item.urgent ? '<span class="pill urgent">Urgent</span>' : ""}
         ${item.public_permission ? '<span class="pill">Wall OK</span>' : '<span class="pill">Private</span>'}
         ${item.wants_contact ? '<span class="pill">Contact</span>' : ""}
+        ${item.status === "prayed" ? '<span class="pill">Prayed</span>' : ""}
         <span>${formatDate(item.created_at)}</span>
       </div>
       <p>${escapeText(item.prayer_request)}</p>
@@ -81,6 +116,7 @@ function renderAdmin(items) {
       </div>
       <div class="actions">
         <button class="button secondary" type="button" data-id="${item.id}" data-status="prayed">Mark Prayed</button>
+        <button class="button secondary" type="button" data-id="${item.id}" data-status="new">Reopen</button>
         <button class="button danger" type="button" data-id="${item.id}" data-status="archived">Archive</button>
       </div>
     </article>
@@ -88,17 +124,24 @@ function renderAdmin(items) {
 }
 
 async function loadAdminRequests() {
+  if (!googleIdToken) {
+    showSignedOut();
+    return;
+  }
+
   adminList.innerHTML = emptyState("Loading", "Please wait.");
 
   try {
     const response = await fetch("/api/admin/prayers", {
-      headers: { Authorization: `Bearer ${await getToken()}` }
+      headers: { Authorization: `Bearer ${googleIdToken}` }
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Could not load admin requests.");
+
+    showSignedIn();
     renderAdmin(data.prayers || []);
   } catch (error) {
-    adminPanel.hidden = true;
+    showSignedOut();
     setNotice(error.message, true);
   }
 }
@@ -108,7 +151,7 @@ async function updateStatus(id, status) {
     const response = await fetch("/api/admin/prayers", {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${await getToken()}`,
+        Authorization: `Bearer ${googleIdToken}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ id, status })
@@ -121,16 +164,11 @@ async function updateStatus(id, status) {
   }
 }
 
-loginBtn.addEventListener("click", async () => {
-  await supabaseClient.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: authRedirectUrl }
-  });
-});
-
-logoutBtn.addEventListener("click", async () => {
-  await supabaseClient.auth.signOut();
-  await updateAuthUI();
+logoutBtn.addEventListener("click", () => {
+  if (window.google?.accounts?.id) {
+    window.google.accounts.id.disableAutoSelect();
+  }
+  showSignedOut();
 });
 
 document.querySelector("#refreshAdmin").addEventListener("click", loadAdminRequests);
