@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -7,7 +8,6 @@
   <title>Admin | Christians Reunite</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="site.js" defer></script>
   <script src="admin.js" defer></script>
@@ -27,10 +27,14 @@
         <div>
           <p class="kicker">Admin</p>
           <h1 class="page-title">Prayer requests</h1>
-          <p class="lead">Sign in with an allowed Google account.</p>
+          <p class="lead">Sign in with your administrator account.</p>
         </div>
         <div class="actions admin-login">
-          <div id="googleSignIn"></div>
+          <form id="adminLoginForm" class="actions" autocomplete="on">
+            <input id="adminEmail" type="email" placeholder="Email" autocomplete="username" required />
+            <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password" required />
+            <button class="button" type="submit">Sign In</button>
+          </form>
           <button id="logoutBtn" class="button secondary" type="button" hidden><i data-lucide="log-out"></i> Sign Out</button>
         </div>
       </div>

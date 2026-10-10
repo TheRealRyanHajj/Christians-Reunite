@@ -1,16 +1,12 @@
 {
   "name": "christians-reunite",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
-  },
+  "scripts": {"start": "node server.js"},
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
-    "google-auth-library": "^9.14.2"
-  },
-  "devDependencies": {
-    "vercel": "^34.3.0"
+    "express": "^4.21.2",
+    "pg": "^8.13.3",
+    "bcryptjs": "^2.4.3",
+    "express-rate-limit": "^7.5.0"
   }
 }

@@ -1,10 +1,11 @@
-let googleIdToken = sessionStorage.getItem("adminGoogleIdToken") || "";
+
+let signedIn = false;
 
 const adminNotice = document.querySelector("#adminNotice");
 const adminPanel = document.querySelector("#adminPanel");
 const adminList = document.querySelector("#adminList");
 const adminCount = document.querySelector("#adminCount");
-const googleSignIn = document.querySelector("#googleSignIn");
+const loginForm = document.querySelector("#adminLoginForm");
 const logoutBtn = document.querySelector("#logoutBtn");
 const searchInput = document.querySelector("#searchInput");
 const statusFilter = document.querySelector("#statusFilter");
@@ -24,83 +25,43 @@ function setNotice(message, isError = false) {
   adminNotice.classList.toggle("error", isError);
 }
 
-async function loadConfig() {
-  const response = await fetch("/api/config");
-  const config = await response.json();
-  if (!response.ok) throw new Error(config.error || "Missing auth config.");
-  if (!config.googleClientId) throw new Error("Missing GOOGLE_CLIENT_ID.");
-  return config;
-}
-
-function waitForGoogle() {
-  return new Promise((resolve, reject) => {
-    let tries = 0;
-    const timer = setInterval(() => {
-      tries += 1;
-      if (window.google?.accounts?.id) {
-        clearInterval(timer);
-        resolve();
-      }
-      if (tries > 80) {
-        clearInterval(timer);
-        reject(new Error("Google sign-in script did not load."));
-      }
-    }, 100);
-  });
-}
-
 async function initAuth() {
   try {
-    const config = await loadConfig();
-    await waitForGoogle();
-
-    window.google.accounts.id.initialize({
-      client_id: config.googleClientId,
-      callback: handleGoogleCredential
-    });
-
-    window.google.accounts.id.renderButton(googleSignIn, {
-      theme: "filled_black",
-      size: "large",
-      text: "signin_with",
-      shape: "rectangular"
-    });
-
-    if (googleIdToken) {
-      await loadAdminRequests();
-      return;
-    }
-
-    showSignedOut();
-  } catch (error) {
-    adminPanel.hidden = true;
-    googleSignIn.hidden = true;
-    logoutBtn.hidden = true;
-    setNotice(error.message, true);
-  }
-}
-
-async function handleGoogleCredential(response) {
-  googleIdToken = response.credential || "";
-  sessionStorage.setItem("adminGoogleIdToken", googleIdToken);
-  await loadAdminRequests();
+    const response = await fetch('/api/admin/session');
+    signedIn = response.ok;
+    if (signedIn) await loadAdminRequests(); else showSignedOut();
+  } catch (error) { showSignedOut(); setNotice(error.message, true); }
 }
 
 function showSignedOut() {
-  googleIdToken = "";
-  sessionStorage.removeItem("adminGoogleIdToken");
+  signedIn = false;
   adminPanel.hidden = true;
-  googleSignIn.hidden = false;
+  loginForm.hidden = false;
   logoutBtn.hidden = true;
-  setNotice("Sign in with an allowed Google account to view prayer requests.");
+  setNotice('Sign in to manage prayer requests.');
 }
 
 function showSignedIn() {
+  signedIn = true;
   adminPanel.hidden = false;
-  googleSignIn.hidden = true;
+  loginForm.hidden = true;
   logoutBtn.hidden = false;
-  setNotice("Signed in with Google.");
+  setNotice('Signed in.');
 }
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  try {
+    const response = await fetch('/api/admin/login', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: document.querySelector('#adminEmail').value, password: document.querySelector('#adminPassword').value})
+    });
+    const data = await response.json();
+    if (!response.ok) throw Error(data.error || 'Could not sign in.');
+    document.querySelector('#adminPassword').value = '';
+    signedIn = true; await loadAdminRequests();
+  } catch(error) { setNotice(error.message, true); }
+});
 
 function renderAdmin(items, meta) {
   totalPages = meta.totalPages || 1;
@@ -142,7 +103,7 @@ function renderAdmin(items, meta) {
 }
 
 async function loadAdminRequests() {
-  if (!googleIdToken) {
+  if (!signedIn) {
     showSignedOut();
     return;
   }
@@ -159,7 +120,7 @@ async function loadAdminRequests() {
       pageSize: String(PAGE_SIZE)
     });
     const response = await fetch(`/api/admin/prayers?${params}`, {
-      headers: { Authorization: `Bearer ${googleIdToken}` }
+      credentials: "same-origin"
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Could not load admin requests.");
@@ -177,8 +138,7 @@ async function updateStatus(id, status) {
     const response = await fetch("/api/admin/prayers", {
       method: "PATCH",
       headers: {
-        Authorization: `Bearer ${googleIdToken}`,
-        "Content-Type": "application/json"
+                "Content-Type": "application/json"
       },
       body: JSON.stringify({ id, status })
     });
@@ -200,11 +160,8 @@ function scheduleSearch() {
   searchTimer = setTimeout(resetAndLoad, 250);
 }
 
-logoutBtn.addEventListener("click", () => {
-  if (window.google?.accounts?.id) {
-    window.google.accounts.id.disableAutoSelect();
-  }
-  showSignedOut();
+logoutBtn.addEventListener("click", async () => {
+  try { await fetch('/api/admin/logout', {method: 'POST'}); } finally { showSignedOut(); }
 });
 
 document.querySelector("#refreshAdmin").addEventListener("click", loadAdminRequests);
