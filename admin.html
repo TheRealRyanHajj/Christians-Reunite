@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,83 +11,86 @@
   <script src="site.js" defer></script>
   <script src="admin.js" defer></script>
 </head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="index.html">
-      <span class="brand-mark"><img src="assets/favicon.svg" alt="" /></span>
-      <span>Christians Reunite</span>
-    </a>
-    <a class="button secondary" href="index.html"><i data-lucide="arrow-left"></i> Site</a>
-  </header>
-
-  <main class="section">
-    <div class="wrap">
-      <div class="admin-head">
-        <div>
-          <p class="kicker">Admin</p>
-          <h1 class="page-title">Prayer requests</h1>
-          <p class="lead">Sign in with your administrator account.</p>
-        </div>
-        <div class="actions admin-login">
-          <form id="adminLoginForm" class="actions" autocomplete="on">
-            <input id="adminEmail" type="email" placeholder="Email" autocomplete="username" required />
-            <input id="adminPassword" type="password" placeholder="Password" autocomplete="current-password" required />
-            <button class="button" type="submit">Sign In</button>
-          </form>
-          <button id="logoutBtn" class="button secondary" type="button" hidden><i data-lucide="log-out"></i> Sign Out</button>
-        </div>
+<body class="admin-body">
+  <main>
+    <section id="adminAuth" class="admin-auth">
+      <div class="auth-card">
+        <a class="brand" href="index.html"><span class="brand-mark"><img src="assets/favicon.svg" alt="" /></span><span>Christians Reunite</span></a>
+        <div><p class="kicker">Administration</p><h1 class="auth-title">Welcome back.</h1><p class="lead">Sign in to manage upcoming events and prayer requests.</p></div>
+        <form id="adminLoginForm" class="auth-form" autocomplete="on">
+          <label class="field"><span>Email address</span><input id="adminEmail" type="email" autocomplete="username" required /></label>
+          <label class="field"><span>Password</span><input id="adminPassword" type="password" autocomplete="current-password" required /></label>
+          <button class="button primary full" type="submit"><i data-lucide="log-in"></i> Sign in</button>
+        </form>
+        <p id="loginNotice" class="notice" role="status"></p>
+        <a class="back-link" href="index.html"><i data-lucide="arrow-left"></i> Return to website</a>
       </div>
+    </section>
 
-      <p id="adminNotice" class="notice"></p>
-
-      <section id="adminPanel" class="panel" hidden>
-        <div class="admin-controls">
-          <label class="field search-field">
-            <span>Search</span>
-            <input id="searchInput" type="search" placeholder="Name, phone, category, or prayer text" />
-          </label>
-          <label class="field">
-            <span>Status</span>
-            <select id="statusFilter">
-              <option value="active">Active</option>
-              <option value="new">New</option>
-              <option value="prayed">Prayed</option>
-              <option value="archived">Archived</option>
-              <option value="all">All</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Priority</span>
-            <select id="priorityFilter">
-              <option value="all">All</option>
-              <option value="urgent">Urgent</option>
-              <option value="contact">Contact</option>
-              <option value="wall">Wall OK</option>
-              <option value="private">Private</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Sort</span>
-            <select id="sortSelect">
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="urgent">Urgent first</option>
-            </select>
-          </label>
+    <section id="adminPanel" class="admin-app" hidden>
+      <aside class="admin-sidebar">
+        <a class="brand" href="index.html"><span class="brand-mark"><img src="assets/favicon.svg" alt="" /></span><span>Christians Reunite</span></a>
+        <nav class="admin-nav" aria-label="Admin sections">
+          <button class="admin-nav-item active" type="button" data-view="events"><i data-lucide="calendar-days"></i><span>Events</span></button>
+          <button class="admin-nav-item" type="button" data-view="prayers"><i data-lucide="heart-handshake"></i><span>Prayer requests</span><span id="prayerNavCount" class="nav-count">0</span></button>
+        </nav>
+        <div class="admin-sidebar-foot">
+          <a class="admin-nav-item" href="index.html"><i data-lucide="external-link"></i><span>View website</span></a>
+          <button id="logoutBtn" class="admin-nav-item" type="button"><i data-lucide="log-out"></i><span>Sign out</span></button>
         </div>
+      </aside>
 
-        <div class="toolbar admin-toolbar">
-          <strong id="adminCount">0 requests</strong>
-          <div class="actions">
-            <button id="prevPage" class="button secondary" type="button"><i data-lucide="chevron-left"></i> Prev</button>
-            <span id="pageInfo" class="page-info">Page 1</span>
-            <button id="nextPage" class="button secondary" type="button">Next <i data-lucide="chevron-right"></i></button>
-            <button id="refreshAdmin" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button>
+      <div class="admin-main">
+        <header class="admin-topline">
+          <div><p class="kicker">Admin workspace</p><h1 id="adminViewTitle" class="admin-page-title">Events</h1></div>
+          <div class="actions"><span id="adminNotice" class="notice" role="status"></span><button id="refreshAdmin" class="icon-button" type="button" aria-label="Refresh"><i data-lucide="refresh-cw"></i></button><button id="newEventBtn" class="button primary" type="button"><i data-lucide="plus"></i> New event</button></div>
+        </header>
+
+        <section id="eventsView" class="admin-view">
+          <div class="metric-grid">
+            <article class="metric-card"><span>Published</span><strong id="publishedCount">0</strong><small>visible on the site</small></article>
+            <article class="metric-card"><span>Drafts</span><strong id="draftCount">0</strong><small>waiting to publish</small></article>
+            <article class="metric-card"><span>Coming up</span><strong id="upcomingCount">0</strong><small>future events</small></article>
           </div>
-        </div>
-        <div id="adminList" class="list"></div>
-      </section>
-    </div>
+          <div class="content-card">
+            <div class="content-card-head"><div><h2>All events</h2><p>Create, publish, and update everything visitors see.</p></div><label class="compact-search"><i data-lucide="search"></i><input id="eventSearch" type="search" placeholder="Search events" /></label></div>
+            <div id="eventAdminList" class="admin-table-list"></div>
+          </div>
+        </section>
+
+        <section id="prayersView" class="admin-view" hidden>
+          <div class="content-card">
+            <div class="admin-controls clean-controls">
+              <label class="field search-field"><span>Search</span><input id="searchInput" type="search" placeholder="Name, phone, category, or prayer" /></label>
+              <label class="field"><span>Status</span><select id="statusFilter"><option value="active">Active</option><option value="new">New</option><option value="prayed">Prayed</option><option value="archived">Archived</option><option value="all">All</option></select></label>
+              <label class="field"><span>Type</span><select id="priorityFilter"><option value="all">All</option><option value="urgent">Urgent</option><option value="contact">Contact</option><option value="wall">Wall OK</option><option value="private">Private</option></select></label>
+              <label class="field"><span>Sort</span><select id="sortSelect"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="urgent">Urgent first</option></select></label>
+            </div>
+            <div class="toolbar admin-toolbar"><strong id="adminCount">0 requests</strong><div class="actions"><button id="prevPage" class="button secondary" type="button"><i data-lucide="chevron-left"></i> Prev</button><span id="pageInfo" class="page-info">Page 1</span><button id="nextPage" class="button secondary" type="button">Next <i data-lucide="chevron-right"></i></button></div></div>
+            <div id="adminList" class="list"></div>
+          </div>
+        </section>
+      </div>
+    </section>
   </main>
+
+  <div id="eventModal" class="modal" hidden>
+    <button class="modal-backdrop" type="button" data-close-modal aria-label="Close editor"></button>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="eventEditorTitle">
+      <div class="modal-head"><div><p class="kicker">Event editor</p><h2 id="eventEditorTitle">Create event</h2></div><button class="icon-button" type="button" data-close-modal aria-label="Close"><i data-lucide="x"></i></button></div>
+      <form id="eventForm" class="event-form">
+        <input id="eventId" type="hidden" />
+        <label class="field"><span>Event title</span><input id="eventTitle" maxlength="140" required placeholder="Community worship night" /></label>
+        <label class="field"><span>Short summary <small>(optional)</small></span><input id="eventSummary" maxlength="240" placeholder="One sentence shown at the top of the card" /></label>
+        <label class="field"><span>Description</span><textarea id="eventDescription" maxlength="5000" required placeholder="Share what people can expect and anything they should bring."></textarea></label>
+        <div class="grid two"><label class="field"><span>Starts</span><input id="eventStart" type="datetime-local" required /></label><label class="field"><span>Ends <small>(optional)</small></span><input id="eventEnd" type="datetime-local" /></label></div>
+        <label class="field"><span>Location <small>(optional)</small></span><input id="eventLocation" maxlength="240" placeholder="Venue name or address" /></label>
+        <label class="field"><span>Registration link <small>(optional)</small></span><input id="eventUrl" type="url" maxlength="500" placeholder="https://..." /></label>
+        <div class="editor-options"><label class="check"><input id="eventFeatured" type="checkbox" /><span>Feature this event</span></label><label class="field"><span>Visibility</span><select id="eventStatus"><option value="draft">Draft — admin only</option><option value="published">Published — visible to everyone</option></select></label></div>
+        <p id="eventFormNotice" class="notice" role="status"></p>
+        <div class="modal-actions"><button class="button secondary" type="button" data-close-modal>Cancel</button><button id="saveEventBtn" class="button primary" type="submit"><i data-lucide="save"></i> Save event</button></div>
+      </form>
+    </section>
+  </div>
 </body>
 </html>

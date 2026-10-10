@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1b2032" />
+  <title>Events | Christians Reunite</title>
+  <meta name="description" content="Upcoming Christians Reunite gatherings, worship nights, service opportunities, and community events." />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <script src="site.js" defer></script>
+  <script src="events.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark"><img src="assets/favicon.svg" alt="" /></span><span>Christians Reunite</span></a>
+    <nav class="site-links" aria-label="Main navigation"><a href="index.html">Home</a><a class="active" href="events.html">Events</a><a href="wall.html">Prayer wall</a><a class="button primary" href="prayer.html"><i data-lucide="heart-handshake"></i> Request prayer</a></nav>
+  </header>
+
+  <main>
+    <section class="events-hero">
+      <div class="wrap"><p class="kicker">Gather with us</p><h1 class="page-title">There’s a place for you here.</h1><p class="lead">Come worship, serve, pray, and grow alongside believers in our community.</p></div>
+    </section>
+    <section class="section events-section">
+      <div class="wrap">
+        <div class="section-heading"><div><p class="kicker">What’s happening</p><h2>Upcoming events</h2></div><button id="refreshEvents" class="button secondary" type="button"><i data-lucide="refresh-cw"></i> Refresh</button></div>
+        <div id="eventsList" class="events-list" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav four-items">
+    <a href="index.html"><i data-lucide="home"></i><span>Home</span></a>
+    <a class="active" href="events.html"><i data-lucide="calendar-days"></i><span>Events</span></a>
+    <a href="prayer.html"><i data-lucide="send"></i><span>Prayer</span></a>
+    <a href="wall.html"><i data-lucide="heart"></i><span>Wall</span></a>
+  </nav>
+</body>
+</html>

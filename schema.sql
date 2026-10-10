@@ -21,3 +21,20 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
  expires_at TIMESTAMPTZ NOT NULL
 );
 CREATE INDEX IF NOT EXISTS admin_sessions_expires_at_idx ON admin_sessions(expires_at);
+
+CREATE TABLE IF NOT EXISTS events (
+ id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+ updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+ title VARCHAR(140) NOT NULL,
+ summary VARCHAR(240),
+ description VARCHAR(5000) NOT NULL,
+ location VARCHAR(240),
+ start_at TIMESTAMPTZ NOT NULL,
+ end_at TIMESTAMPTZ,
+ registration_url VARCHAR(500),
+ featured BOOLEAN NOT NULL DEFAULT false,
+ status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','published')),
+ CHECK (end_at IS NULL OR end_at >= start_at)
+);
+CREATE INDEX IF NOT EXISTS events_public_upcoming_idx ON events(status,start_at);

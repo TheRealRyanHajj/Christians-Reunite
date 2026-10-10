@@ -3,15 +3,23 @@ const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const crypto = require('node:crypto');
+const path = require('node:path');
 const { rateLimit } = require('express-rate-limit');
 const app = express();
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(express.json({limit:'32kb'}));
+app.use('/assets',express.static(path.join(__dirname,'assets'),{maxAge:'7d'}));
+const publicFiles=['index.html','events.html','prayer.html','wall.html','admin.html','styles.css','site.js','events.js','prayer.js','wall.js','admin.js'];
+for(const file of publicFiles){
+ const route=file==='index.html'?['/',`/${file}`]:`/${file}`;
+ app.get(route,(req,res)=>res.sendFile(path.join(__dirname,file)));
+}
 const db = new Pool({host:process.env.DB_HOST||'db',port:5432,database:process.env.DB_NAME||'christians',user:process.env.DB_USER||'christians',password:process.env.DB_PASSWORD,max:10});
 const cats = (process.env.PRAYER_CATEGORIES||'Addiction,Family,Finances,Health,Marriage,Grief,Guidance,Salvation,Community,Other').split(',').map(x=>x.trim()).filter(Boolean);
 const err = (res,code,message)=>res.status(code).json({error:message});
 const clean = (x,max)=>(typeof x==='string'?x.trim().slice(0,max):'')||null;
+const cleanUrl=(x,max=500)=>{const value=clean(x,max);if(!value)return null;try{const url=new URL(value);return ['http:','https:'].includes(url.protocol)?url.toString():null;}catch{return null;}};
 const pagination=(q,defaultSize,max)=>({page:Math.min(Math.max(parseInt(q.page,10)||1,1),100000),pageSize:Math.min(Math.max(parseInt(q.pageSize,10)||defaultSize,10),max)});
 const isUuid=x=>typeof x==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(x);
 const limiter=(max)=>rateLimit({windowMs:15*60*1000,limit:max,standardHeaders:'draft-7',legacyHeaders:false,message:{error:'Too many requests. Try again later.'}});
@@ -63,6 +71,16 @@ function checkOrigin(req,res,next){
  if(req.headers['sec-fetch-site']==='cross-site')return err(res,403,'Cross-site request blocked.');
  next();
 }
+function eventInput(body,res){
+ const b=body||{},title=clean(b.title,140),summary=clean(b.summary,240),description=clean(b.description,5000),location=clean(b.location,240);
+ const start=new Date(b.startAt),end=b.endAt?new Date(b.endAt):null,status=['draft','published'].includes(b.status)?b.status:'draft';
+ if(!title||!description||Number.isNaN(start.getTime())){err(res,400,'Title, description, and a valid start date are required.');return null;}
+ if(end&&Number.isNaN(end.getTime())){err(res,400,'End date is invalid.');return null;}
+ if(end&&end<start){err(res,400,'End date must be after the start date.');return null;}
+ const requestedUrl=clean(b.registrationUrl,500),registrationUrl=cleanUrl(b.registrationUrl);
+ if(requestedUrl&&!registrationUrl){err(res,400,'Registration link must be a valid http or https URL.');return null;}
+ return [title,summary,description,location,start.toISOString(),end?.toISOString()||null,registrationUrl,Boolean(b.featured),status];
+}
 app.use('/api',checkOrigin);
 app.get('/api/health',async(req,res,next)=>{try{await db.query('SELECT 1');res.json({ok:true});}catch(e){next(e)}});
 app.get('/api/categories',(req,res)=>res.json({categories:cats}));
@@ -78,6 +96,12 @@ app.patch('/api/prayers',prayLimit,async(req,res,next)=>{try{
  const {id,action}=req.body||{};if(!isUuid(id)||action!=='prayed')return err(res,400,'Invalid request.');
  const r=await db.query(`UPDATE prayer_requests SET prayed_count=prayed_count+1 WHERE id=$1 AND public_permission=TRUE AND status<>'archived' RETURNING prayed_count`,[id]);
  if(!r.rowCount)return err(res,404,'Prayer request not found.');res.json({prayedCount:r.rows[0].prayed_count});
+ }catch(e){next(e)}});
+app.get('/api/events',async(req,res,next)=>{try{
+ const result=await db.query(`SELECT id,title,summary,description,location,start_at,end_at,registration_url,featured
+   FROM events WHERE status='published' AND COALESCE(end_at,start_at)>=now()
+   ORDER BY featured DESC,start_at ASC,id ASC`);
+ res.json({events:result.rows});
  }catch(e){next(e)}});
 app.post('/api/admin/login',loginLimit,async(req,res,next)=>{try{
  const email=clean(req.body?.email,320)?.toLowerCase(),password=req.body?.password;
@@ -101,6 +125,29 @@ app.patch('/api/admin/prayers',requireAdmin,async(req,res,next)=>{try{
  const r=await db.query('UPDATE prayer_requests SET status=$1 WHERE id=$2',[status,id]);
  if(!r.rowCount)return err(res,404,'Prayer request not found.');res.json({ok:true});
  }catch(e){next(e)}});
+app.get('/api/admin/events',requireAdmin,async(req,res,next)=>{try{
+ const result=await db.query(`SELECT * FROM events ORDER BY CASE status WHEN 'published' THEN 0 WHEN 'draft' THEN 1 ELSE 2 END,start_at ASC,created_at DESC`);
+ res.json({events:result.rows});
+ }catch(e){next(e)}});
+app.post('/api/admin/events',requireAdmin,async(req,res,next)=>{try{
+ const event=eventInput(req.body,res);if(!event)return;
+ const r=await db.query(`INSERT INTO events (title,summary,description,location,start_at,end_at,registration_url,featured,status)
+   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,event);
+ res.status(201).json({event:r.rows[0]});
+ }catch(e){next(e)}});
+app.patch('/api/admin/events',requireAdmin,async(req,res,next)=>{try{
+ const {id}=req.body||{};if(!isUuid(id))return err(res,400,'Invalid event.');
+ const event=eventInput(req.body,res);if(!event)return;
+ const r=await db.query(`UPDATE events SET title=$1,summary=$2,description=$3,location=$4,start_at=$5,end_at=$6,
+   registration_url=$7,featured=$8,status=$9,updated_at=now() WHERE id=$10 RETURNING *`,[...event,id]);
+ if(!r.rowCount)return err(res,404,'Event not found.');res.json({event:r.rows[0]});
+ }catch(e){next(e)}});
+app.delete('/api/admin/events',requireAdmin,async(req,res,next)=>{try{
+ const {id}=req.body||{};if(!isUuid(id))return err(res,400,'Invalid event.');
+ const r=await db.query('DELETE FROM events WHERE id=$1',[id]);
+ if(!r.rowCount)return err(res,404,'Event not found.');res.json({ok:true});
+ }catch(e){next(e)}});
 app.use('/api',(req,res)=>err(res,404,'Not found.'));
+app.use((req,res)=>res.status(404).sendFile(path.join(__dirname,'index.html')));
 app.use((error,req,res,next)=>{console.error(error);err(res,500,'Internal server error.');});
 const port=3000;app.listen(port,'0.0.0.0',()=>console.log(`Christians Reunite API listening on ${port}`));
