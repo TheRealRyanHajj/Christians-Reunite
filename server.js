@@ -13,7 +13,8 @@ app.use('/assets',express.static(path.join(__dirname,'assets'),{maxAge:'7d'}));
 const publicFiles=['index.html','events.html','prayer.html','wall.html','admin.html','styles.css','site.js','events.js','prayer.js','wall.js','admin.js'];
 for(const file of publicFiles){
  const route=file==='index.html'?['/',`/${file}`]:`/${file}`;
- app.get(route,(req,res)=>res.sendFile(path.join(__dirname,file)));
+ const cacheControl=file.endsWith('.html')?'no-store, max-age=0':'no-cache';
+ app.get(route,(req,res)=>res.sendFile(path.join(__dirname,file),{headers:{'Cache-Control':cacheControl}}));
 }
 const db = new Pool({host:process.env.DB_HOST||'db',port:5432,database:process.env.DB_NAME||'christians',user:process.env.DB_USER||'christians',password:process.env.DB_PASSWORD,max:10});
 const cats = (process.env.PRAYER_CATEGORIES||'Addiction,Family,Finances,Health,Marriage,Grief,Guidance,Salvation,Community,Other').split(',').map(x=>x.trim()).filter(Boolean);
